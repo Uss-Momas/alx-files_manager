@@ -12,6 +12,8 @@ class DBClient {
       useUnifiedTopology: true,
     });
     this.client.connect();
+
+    this.usersCollection = this.client.db(this.dbName).collection('users');
   }
 
   isAlive() {
@@ -21,6 +23,10 @@ class DBClient {
   async nbUsers() {
     const db = this.client.db(this.dbName);
     const value = await db.collection('users').estimatedDocumentCount();
+    return value;
+  }
+  async createUser(user) {
+    const value = await this.client.db(this.dbName).collection('users').insertOne(user);
     return value;
   }
 
