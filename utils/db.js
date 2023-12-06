@@ -25,6 +25,7 @@ class DBClient {
     const value = await db.collection('users').estimatedDocumentCount();
     return value;
   }
+
   async createUser(user) {
     const value = await this.client.db(this.dbName).collection('users').insertOne(user);
     return value;
