@@ -1,9 +1,8 @@
-
 class UsersController {
-    static postNew(req, res) {
-        console.log(req);
-        res.send('User created');
-    }
+  static postNew(req, res) {
+    console.log(req);
+    res.send('User created');
+  }
 }
 
 module.exports = UsersController;
