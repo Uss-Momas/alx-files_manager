@@ -118,16 +118,33 @@ class FilesController {
 
     if (!user) { return response.status(401).json({ error: 'Unauthorized' }); }
 
-    const parentId = request.query.parentId || 0;
+    let parentId = request.query.parentId || 0;
     // parseInt(str_number, base), base can be 2, 10, 16...
-    const page = parseInt(request.query.page, 10) || 0;
+    if (parentId === '0') parentId = 0;
+
+    let page = Number(request.query.page) || 0;
+    if (Number.isNaN(page)) page = 0;
+
+    if (parentId !== 0 && parentId !== '0') {
+      const folder = await dbClient.filesCollection.findOne({ _id: ObjectId(parentId) });
+
+      if (!folder || folder.type !== 'folder') { return response.status(200).send([]); }
+    }
 
     const limit = 20;
     const skip = page * limit;
 
-    const pipeline = [
-      { $match: { userId: user._id, parentId } }, { $limit: limit }, { $skip: skip },
-    ];
+    let pipeline;
+
+    if (parentId === 0 || parentId === '0') {
+      pipeline = [
+        { $match: { userId: user._id } }, { $limit: limit }, { $skip: skip },
+      ];
+    } else {
+      pipeline = [
+        { $match: { userId: user._id, parentId } }, { $limit: limit }, { $skip: skip },
+      ];
+    }
 
     // const files = await dbClient.filesCollection.find({userId: user._id}).toArray();
     const files = await dbClient.filesCollection.aggregate(pipeline).toArray();
