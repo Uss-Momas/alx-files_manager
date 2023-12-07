@@ -14,6 +14,7 @@ class DBClient {
     this.client.connect();
 
     this.usersCollection = this.client.db(this.dbName).collection('users');
+    this.filesCollection = this.client.db(this.dbName).collection('files');
   }
 
   isAlive() {
