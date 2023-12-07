@@ -18,4 +18,7 @@ router.get('/users/me', UsersController.getMe);
 router.get('/connect', AuthController.getConnect);
 router.get('/disconnect', AuthController.getDisconnect);
 
+// Files routes
+router.post('/files', FilesController.postUpload);
+
 module.exports = router;
