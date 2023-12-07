@@ -77,6 +77,74 @@ class FilesController {
       parentId: fileData.parentId,
     });
   }
+
+  static async getShow(request, response) {
+    const token = request.headers['x-token'];
+    const id = await redisClient.get(`auth_${token}`);
+
+    const user = await dbClient.usersCollection.findOne({ _id: ObjectId(id) });
+
+    console.log(request.params.id);
+
+    if (!user) { return response.status(401).json({ error: 'Unauthorized' }); }
+
+    let fileId = request.params.id;
+    try {
+      fileId = ObjectId(fileId);
+    } catch (err) {
+      return response.status(404).json({ error: 'Not Found' });
+    }
+    const file = await dbClient.filesCollection.findOne(
+      { _id: ObjectId(fileId), userId: user._id },
+    );
+
+    if (!file) { return response.status(404).json({ error: 'Not Found' }); }
+
+    return response.status(200).json({
+      id: file._id,
+      userId: file.userId,
+      name: file.name,
+      type: file.type,
+      isPublic: file.isPublic,
+      parentId: file.parentId,
+    });
+  }
+
+  static async getIndex(request, response) {
+    const token = request.headers['x-token'];
+    const id = await redisClient.get(`auth_${token}`);
+
+    const user = await dbClient.usersCollection.findOne({ _id: ObjectId(id) });
+
+    if (!user) { return response.status(401).json({ error: 'Unauthorized' }); }
+
+    const parentId = request.query.parentId || 0;
+    // parseInt(str_number, base), base can be 2, 10, 16...
+    const page = parseInt(request.query.page, 10) || 0;
+
+    const limit = 20;
+    const skip = page * limit;
+
+    const pipeline = [
+      { $match: { userId: user._id, parentId } }, { $limit: limit }, { $skip: skip },
+    ];
+
+    // const files = await dbClient.filesCollection.find({userId: user._id}).toArray();
+    const files = await dbClient.filesCollection.aggregate(pipeline).toArray();
+
+    // return response.status(200).json({});
+
+    const filesRefactored = files.map((file) => ({
+      id: file._id,
+      userId: file.userId,
+      name: file.name,
+      type: file.type,
+      isPublic: file.isPublic,
+      parentId: file.parentId,
+    }));
+
+    return response.status(200).json(filesRefactored);
+  }
 }
 
 module.exports = FilesController;
