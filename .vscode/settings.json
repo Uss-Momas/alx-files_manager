@@ -1,0 +1,6 @@
+{
+    "[javascript]": {
+        "editor.fontFamily": "JetBrains Mono",
+        "editor.wordWrap": "on"
+    }
+}
