@@ -1,5 +1,5 @@
-import redisClient from './redis';
 import { v4 as uuidv4 } from 'uuid';
+import redisClient from './redis';
 
 export default async function generateAuthToken(userId) {
   const token = uuidv4();
