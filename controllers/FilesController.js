@@ -79,4 +79,75 @@ export default class FilesController {
 
     return res.status(201).json(result);
   }
+
+  static async getIndex(request, response) {
+    const token = request.headers['x-token'];
+    const userId = await redisClient.get(`auth_${token}`);
+    const user = await dbClient.findUserById(userId);
+
+    if (!user) { return response.status(401).json({ error: 'Unauthorized' }); }
+
+    let parentId = request.query.parentId || 0;
+    if (parentId === '0') parentId = 0;
+
+    let page = Number(request.query.page) || 0;
+    if (Number.isNaN(page)) page = 0;
+
+    if (parentId !== 0) {
+      const folder = await dbClient.findFileById(parentId);
+
+      if (!folder || folder.type !== 'folder') { return response.status(200).send([]); }
+    }
+
+    const limit = 20;
+    const skip = page * limit;
+
+    let pipeline;
+
+    if (parentId === 0) {
+      pipeline = [
+        { $match: { userId: user._id } }, { $limit: limit }, { $skip: skip },
+      ];
+    } else {
+      pipeline = [
+        { $match: { userId: user._id, parentId } }, { $limit: limit }, { $skip: skip },
+      ];
+    }
+
+    const files = await dbClient.getAllFilesWithAggregator(pipeline);
+
+    const filesRefactored = files.map((file) => ({
+      id: file._id,
+      userId: file.userId,
+      name: file.name,
+      type: file.type,
+      isPublic: file.isPublic,
+      parentId: file.parentId,
+    }));
+
+    return response.status(200).json(filesRefactored);
+  }
+
+  static async getShow(request, response) {
+    const token = request.headers['x-token'];
+    const userId = await redisClient.get(`auth_${token}`);
+    const user = await dbClient.findUserById(userId);
+
+    if (!user) { return response.status(401).json({ error: 'Unauthorized' }); }
+
+    const fileId = request.params.id;
+
+    const file = await dbClient.findFileByIdAndUserId(fileId, user._id);
+
+    if (!file) { return response.status(404).json({ error: 'Not Found' }); }
+
+    return response.json({
+      id: file._id,
+      userId: file.userId,
+      name: file.name,
+      type: file.type,
+      isPublic: file.isPublic,
+      parentId: file.parentId,
+    });
+  }
 }

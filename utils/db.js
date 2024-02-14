@@ -66,6 +66,16 @@ class DBClient {
     const file = await this.client.db().collection('files').findOne({ _id: new ObjectId(id) });
     return file;
   }
+
+  async findFileByIdAndUserId(fileId, userId) {
+    const file = await this.client.db().collection('files').findOne({ _id: ObjectId(fileId), userId });
+    return file;
+  }
+
+  async getAllFilesWithAggregator(pipeline) {
+    const files = await this.client.db().collection('files').aggregate(pipeline).toArray();
+    return files;
+  }
 }
 
 export default new DBClient();
