@@ -48,6 +48,24 @@ class DBClient {
     const newUser = await this.findUserById(result.insertedId);
     return { id: newUser._id, email: newUser.email };
   }
+
+  async createNewFile(fileData) {
+    const result = await this.client.db().collection('files').insertOne(fileData);
+    const newFile = await this.findFileById(result.insertedId);
+    return {
+      id: newFile._id,
+      userId: newFile.userId,
+      name: newFile.name,
+      type: newFile.type,
+      isPublic: newFile.isPublic,
+      parentId: newFile.parentId,
+    };
+  }
+
+  async findFileById(id) {
+    const file = await this.client.db().collection('files').findOne({ _id: new ObjectId(id) });
+    return file;
+  }
 }
 
 export default new DBClient();
