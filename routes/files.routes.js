@@ -8,5 +8,6 @@ filesRoutes.get('/files/:id', async (req, res) => FilesController.getShow(req, r
 filesRoutes.get('/files', async (req, res) => FilesController.getIndex(req, res));
 filesRoutes.put('/files/:id/publish', async (req, res) => FilesController.putPublish(req, res));
 filesRoutes.put('/files/:id/unpublish', async (req, res) => FilesController.putUnpublish(req, res));
+filesRoutes.get('/files/:id/data', async (req, res) => FilesController.getFile(req, res));
 
 export default filesRoutes;
