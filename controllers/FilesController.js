@@ -139,7 +139,7 @@ export default class FilesController {
 
     const file = await dbClient.findFileByIdAndUserId(fileId, user._id);
 
-    if (!file) { return response.status(404).json({ error: 'Not Found' }); }
+    if (!file) { return response.status(404).json({ error: 'Not found' }); }
 
     return response.json({
       id: file._id,
