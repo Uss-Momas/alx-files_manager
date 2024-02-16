@@ -1,3 +1,4 @@
+import sha1 from 'sha1';
 import decodeBase64 from '../utils/decodeBase64';
 import dbClient from '../utils/db';
 import generateAuthToken from '../utils/generateAuthToken';
@@ -14,8 +15,13 @@ class AuthController {
     const base64Data = authData[1];
     const credentials = decodeBase64(base64Data);
 
-    const user = await dbClient.finduserByEmail(credentials.split(':')[0]);
+    const [userName, userPassword] = credentials.split(':');
+    const user = await dbClient.finduserByEmail(userName);
     if (!user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    const hashedPwd = sha1(userPassword);
+    if (hashedPwd !== user.password) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
