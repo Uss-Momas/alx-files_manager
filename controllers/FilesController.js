@@ -106,11 +106,11 @@ export default class FilesController {
 
     if (parentId === 0) {
       pipeline = [
-        { $match: { userId: user._id } }, { $limit: limit }, { $skip: skip },
+        { $match: { userId: user._id } }, { $skip: skip }, { $limit: limit },
       ];
     } else {
       pipeline = [
-        { $match: { userId: user._id, parentId } }, { $limit: limit }, { $skip: skip },
+        { $match: { userId: user._id, parentId } }, { $skip: skip }, { $limit: limit }
       ];
     }
 
